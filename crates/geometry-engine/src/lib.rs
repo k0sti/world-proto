@@ -1,5 +1,4 @@
 mod geometry;
-mod math;
 
 use wasm_bindgen::prelude::*;
 use geometry::{AnimationState};
@@ -20,39 +19,9 @@ impl GeometryEngine {
     }
 
     #[wasm_bindgen]
-    pub fn update_camera(&mut self, camera_x: f32, camera_y: f32, camera_z: f32, radius: f32) {
-        self.animation_state.update_camera(camera_x, camera_y, camera_z, radius);
-    }
-    
-    #[wasm_bindgen]
-    pub fn set_grid_size(&mut self, grid_size: u32) {
-        self.animation_state.set_grid_size(grid_size as usize);
-    }
-
-    #[wasm_bindgen]
     pub fn generate_frame(&mut self, camera_x: f32, camera_y: f32, camera_z: f32, radius: f32) -> GeometryData {
         self.animation_state.update_camera(camera_x, camera_y, camera_z, radius);
         self.animation_state.generate_geometry()
-    }
-
-    #[wasm_bindgen]
-    pub fn get_vertices(&mut self) -> Vec<f32> {
-        self.animation_state.get_current_vertices()
-    }
-
-    #[wasm_bindgen]
-    pub fn get_indices(&mut self) -> Vec<u32> {
-        self.animation_state.get_current_indices()
-    }
-
-    #[wasm_bindgen]
-    pub fn get_normals(&mut self) -> Vec<f32> {
-        self.animation_state.get_current_normals()
-    }
-    
-    #[wasm_bindgen]
-    pub fn get_animation_info(&self) -> String {
-        self.animation_state.get_animation_info()
     }
 }
 

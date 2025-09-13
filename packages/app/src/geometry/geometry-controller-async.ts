@@ -64,14 +64,6 @@ export class GeometryControllerAsync {
     }
   }
   
-  setGridSize(gridSize: number) {
-    if (this.worker) {
-      this.worker.postMessage({
-        type: 'setGridSize',
-        gridSize
-      });
-    }
-  }
   
   // Called from render loop to apply latest geometry if available
   applyLatestGeometry() {

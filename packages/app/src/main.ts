@@ -34,16 +34,7 @@ class Application {
   }
   
   private setupDebugPanel(): void {
-    const gridSizeSlider = document.getElementById('grid-size') as HTMLInputElement;
-    const gridSizeValue = document.getElementById('grid-size-value');
-    
-    if (gridSizeSlider && gridSizeValue) {
-      gridSizeSlider.addEventListener('input', (e) => {
-        const value = parseInt((e.target as HTMLInputElement).value);
-        gridSizeValue.textContent = value.toString();
-        this.geometryController.setGridSize(value);
-      });
-    }
+    // Debug panel is now display-only
   }
 
   private handleResize(): void {
@@ -98,11 +89,6 @@ class Application {
       fpsElement.textContent = fps.toString();
     }
     
-    // Update stats display
-    const statsElement = document.getElementById('stats');
-    if (statsElement) {
-      statsElement.textContent = 'Procedural Terrain Generator';
-    }
 
     requestAnimationFrame(this.animate);
   };

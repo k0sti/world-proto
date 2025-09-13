@@ -1,12 +1,11 @@
 import { GeometryGenerator } from '@workspace/geometry-lib';
 
 export interface GeometryMessage {
-  type: 'init' | 'update' | 'setGridSize';
+  type: 'init' | 'update';
   cameraX?: number;
   cameraY?: number;
   cameraZ?: number;
   radius?: number;
-  gridSize?: number;
 }
 
 export interface GeometryResult {
@@ -100,11 +99,6 @@ class GeometryWorkerManager {
     this.currentRadius = radius;
   }
   
-  setGridSize(gridSize: number) {
-    if (this.generator) {
-      this.generator.setGridSize(gridSize);
-    }
-  }
   
   stop() {
     this.isRunning = false;
@@ -125,12 +119,6 @@ self.addEventListener('message', async (event) => {
     case 'update':
       if (message.cameraX !== undefined && message.cameraY !== undefined && message.cameraZ !== undefined && message.radius !== undefined) {
         manager.updateCamera(message.cameraX, message.cameraY, message.cameraZ, message.radius);
-      }
-      break;
-      
-    case 'setGridSize':
-      if (message.gridSize !== undefined) {
-        manager.setGridSize(message.gridSize);
       }
       break;
   }

@@ -1,5 +1,3 @@
-use rand::Rng;
-
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(u32)]
 pub enum BlockType {
@@ -48,35 +46,11 @@ pub struct VoxelChunk {
 }
 
 impl VoxelChunk {
-    pub fn new(chunk_x: i32, chunk_y: i32, chunk_z: i32) -> Self {
-        let mut blocks = [[[0u32; 16]; 16]; 16];
-        let mut rng = rand::thread_rng();
-        
-        // Initialize with random values 0-7
-        for x in 0..16 {
-            for y in 0..16 {
-                for z in 0..16 {
-                    // Make lower layers more likely to be solid
-                    let air_probability = y as f32 / 16.0;
-                    if rng.gen::<f32>() > air_probability {
-                        blocks[x][y][z] = rng.gen_range(1..8);
-                    }
-                }
-            }
-        }
-        
-        Self {
-            blocks,
-            position: (chunk_x, chunk_y, chunk_z),
-        }
-    }
-    
     pub fn new_with_terrain<F>(chunk_x: i32, chunk_y: i32, chunk_z: i32, terrain_height_fn: F) -> Self 
     where
         F: Fn(f32, f32) -> f32,
     {
         let mut blocks = [[[0u32; 16]; 16]; 16];
-        let mut rng = rand::thread_rng();
         
         let chunk_world_x = chunk_x as f32 * 16.0;
         let chunk_world_y = chunk_y as f32 * 16.0;
@@ -115,7 +89,7 @@ impl VoxelChunk {
         BlockType::from_u32(self.blocks[x][y][z])
     }
     
-    pub fn is_face_visible(&self, x: usize, y: usize, z: usize, face: Face) -> bool {
+    fn is_face_visible(&self, x: usize, y: usize, z: usize, face: Face) -> bool {
         let block = self.get_block(x, y, z);
         if block == BlockType::Air {
             return false;

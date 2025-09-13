@@ -30,31 +30,6 @@ export class GeometryGenerator {
     }
     return this.engine.generate_frame(cameraX, cameraY, cameraZ, radius);
   }
-
-  getVertices(): Float32Array {
-    if (!this.engine) return new Float32Array();
-    return new Float32Array(this.engine.get_vertices());
-  }
-
-  getIndices(): Uint32Array {
-    if (!this.engine) return new Uint32Array();
-    return new Uint32Array(this.engine.get_indices());
-  }
-
-  getNormals(): Float32Array {
-    if (!this.engine) return new Float32Array();
-    return new Float32Array(this.engine.get_normals());
-  }
-
-  getAnimationInfo(): string {
-    if (!this.engine) return 'Not initialized';
-    return this.engine.get_animation_info();
-  }
-  
-  setGridSize(gridSize: number): void {
-    if (!this.engine) return;
-    this.engine.set_grid_size(gridSize);
-  }
 }
 
 export { GeometryEngine, GeometryData };
