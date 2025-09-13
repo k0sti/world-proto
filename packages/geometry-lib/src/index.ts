@@ -30,6 +30,14 @@ export class GeometryGenerator {
     }
     return this.engine.generate_frame(cameraX, cameraY, cameraZ, radius);
   }
+  
+  setRenderDistance(distance: number): void {
+    if (!this.engine) {
+      console.error('GeometryEngine not initialized');
+      return;
+    }
+    this.engine.set_render_distance(distance);
+  }
 }
 
 export { GeometryEngine, GeometryData };

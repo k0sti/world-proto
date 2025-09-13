@@ -1,11 +1,12 @@
 import { GeometryGenerator } from '@workspace/geometry-lib';
 
 export interface GeometryMessage {
-  type: 'init' | 'update';
+  type: 'init' | 'update' | 'setRenderDistance';
   cameraX?: number;
   cameraY?: number;
   cameraZ?: number;
   radius?: number;
+  renderDistance?: number;
 }
 
 export interface GeometryResult {
@@ -99,6 +100,12 @@ class GeometryWorkerManager {
     this.currentRadius = radius;
   }
   
+  setRenderDistance(distance: number) {
+    if (this.generator) {
+      this.generator.setRenderDistance(distance);
+    }
+  }
+  
   
   stop() {
     this.isRunning = false;
@@ -119,6 +126,12 @@ self.addEventListener('message', async (event) => {
     case 'update':
       if (message.cameraX !== undefined && message.cameraY !== undefined && message.cameraZ !== undefined && message.radius !== undefined) {
         manager.updateCamera(message.cameraX, message.cameraY, message.cameraZ, message.radius);
+      }
+      break;
+      
+    case 'setRenderDistance':
+      if (message.renderDistance !== undefined) {
+        manager.setRenderDistance(message.renderDistance);
       }
       break;
   }

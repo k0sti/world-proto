@@ -6,6 +6,7 @@ pub struct TerrainGenerator {
     camera_y: f32,
     camera_z: f32,
     radius: f32,
+    render_distance: i32,
     voxel_chunks: HashMap<(i32, i32, i32), VoxelChunk>,
 }
 
@@ -16,6 +17,7 @@ impl TerrainGenerator {
             camera_y: 0.0,
             camera_z: 0.0,
             radius: 15.0,
+            render_distance: 1,
             voxel_chunks: HashMap::new(),
         }
     }
@@ -25,6 +27,12 @@ impl TerrainGenerator {
         self.camera_y = camera_y;
         self.camera_z = camera_z;
         self.radius = radius;
+    }
+    
+    pub fn set_render_distance(&mut self, distance: i32) {
+        self.render_distance = distance.max(1).min(5);
+        // Clear chunks to force regeneration with new distance
+        self.voxel_chunks.clear();
     }
 
     pub fn generate(&mut self) -> (Vec<f32>, Vec<u32>, Vec<f32>, Vec<f32>) {
@@ -60,10 +68,12 @@ impl TerrainGenerator {
         let chunk_y = (self.camera_y / 16.0).floor() as i32;
         let chunk_z = (self.camera_z / 16.0).floor() as i32;
         
-        // Generate 3x3x3 grid of chunks around camera
-        for dx in -1..=1 {
-            for dy in -2..=2 {  // More vertical range to see terrain variation
-                for dz in -1..=1 {
+        let dist = self.render_distance;
+        
+        // Generate grid of chunks around camera based on render distance
+        for dx in -dist..=dist {
+            for dy in -(dist + 1)..=(dist + 1) {  // More vertical range to see terrain variation
+                for dz in -dist..=dist {
                     positions.push((chunk_x + dx, chunk_y + dy, chunk_z + dz));
                 }
             }

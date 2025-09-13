@@ -34,7 +34,16 @@ class Application {
   }
   
   private setupDebugPanel(): void {
-    // Debug panel is now display-only
+    const renderDistanceSlider = document.getElementById('render-distance') as HTMLInputElement;
+    const renderDistanceValue = document.getElementById('render-distance-value');
+    
+    if (renderDistanceSlider && renderDistanceValue) {
+      renderDistanceSlider.addEventListener('input', (e) => {
+        const value = parseInt((e.target as HTMLInputElement).value);
+        renderDistanceValue.textContent = value.toString();
+        this.geometryController.setRenderDistance(value);
+      });
+    }
   }
 
   private handleResize(): void {

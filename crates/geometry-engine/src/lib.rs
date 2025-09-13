@@ -23,6 +23,11 @@ impl GeometryEngine {
         self.animation_state.update_camera(camera_x, camera_y, camera_z, radius);
         self.animation_state.generate_geometry()
     }
+    
+    #[wasm_bindgen]
+    pub fn set_render_distance(&mut self, distance: i32) {
+        self.animation_state.set_render_distance(distance);
+    }
 }
 
 #[wasm_bindgen]

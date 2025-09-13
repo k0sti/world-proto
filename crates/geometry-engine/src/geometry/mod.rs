@@ -18,6 +18,10 @@ impl AnimationState {
     pub fn update_camera(&mut self, camera_x: f32, camera_y: f32, camera_z: f32, radius: f32) {
         self.terrain.update_camera(camera_x, camera_y, camera_z, radius);
     }
+    
+    pub fn set_render_distance(&mut self, distance: i32) {
+        self.terrain.set_render_distance(distance);
+    }
 
     pub fn generate_geometry(&mut self) -> GeometryData {
         let (vertices, indices, normals, colors) = self.terrain.generate();

@@ -64,6 +64,14 @@ export class GeometryControllerAsync {
     }
   }
   
+  setRenderDistance(distance: number) {
+    if (this.worker) {
+      this.worker.postMessage({
+        type: 'setRenderDistance',
+        renderDistance: distance
+      });
+    }
+  }
   
   // Called from render loop to apply latest geometry if available
   applyLatestGeometry() {
