@@ -1,0 +1,22 @@
+{
+  "name": "3d-geometry-renderer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run build:wasm && bun run --filter @workspace/app dev",
+    "build": "bun run build:wasm && bun run build:all",
+    "build:all": "bun run --filter '@workspace/*' build",
+    "build:wasm": "wasm-pack build crates/geometry-engine --target web --out-dir ../../packages/wasm",
+    "build:wasm:dev": "wasm-pack build crates/geometry-engine --dev --target web --out-dir ../../packages/wasm",
+    "clean": "rm -rf packages/wasm && bun run --filter '@workspace/*' clean",
+    "test": "bun run --filter '@workspace/*' test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.3.3"
+  }
+}
