@@ -20,8 +20,13 @@ impl GeometryEngine {
     }
 
     #[wasm_bindgen]
-    pub fn generate_frame(&mut self, time: f32, delta_time: f32) -> GeometryData {
-        self.animation_state.update(time, delta_time);
+    pub fn update_camera(&mut self, camera_x: f32, camera_z: f32, radius: f32) {
+        self.animation_state.update_camera(camera_x, camera_z, radius);
+    }
+
+    #[wasm_bindgen]
+    pub fn generate_frame(&mut self, camera_x: f32, camera_z: f32, radius: f32) -> GeometryData {
+        self.animation_state.update_camera(camera_x, camera_z, radius);
         self.animation_state.generate_geometry()
     }
 

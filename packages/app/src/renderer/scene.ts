@@ -167,4 +167,11 @@ export class SceneManager {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
   }
+
+  getCameraPosition(): { x: number, z: number } {
+    return {
+      x: this.camera.position.x,
+      z: this.camera.position.z
+    };
+  }
 }

@@ -23,7 +23,11 @@ export class GeometryController {
       return;
     }
 
-    const geometryData = this.geometryGenerator.generateFrame(time, deltaTime);
+    // Get camera position from scene manager
+    const cameraPos = this.sceneManager.getCameraPosition();
+    const radius = 30.0; // Terrain generation radius
+    
+    const geometryData = this.geometryGenerator.generateFrame(cameraPos.x, cameraPos.z, radius);
     
     if (geometryData) {
       const vertices = new Float32Array(geometryData.vertices);
