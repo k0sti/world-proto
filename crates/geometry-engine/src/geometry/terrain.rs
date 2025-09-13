@@ -1,4 +1,6 @@
 use nalgebra::Vector3;
+use std::collections::HashMap;
+use super::voxel::VoxelChunk;
 
 pub struct TerrainGenerator {
     grid_size: usize,
@@ -6,6 +8,7 @@ pub struct TerrainGenerator {
     camera_x: f32,
     camera_z: f32,
     radius: f32,
+    voxel_chunks: HashMap<(i32, i32, i32), VoxelChunk>,
 }
 
 impl TerrainGenerator {
@@ -16,6 +19,7 @@ impl TerrainGenerator {
             camera_x: 0.0,
             camera_z: 0.0,
             radius: 15.0,
+            voxel_chunks: HashMap::new(),
         }
     }
 
@@ -29,10 +33,11 @@ impl TerrainGenerator {
         self.grid_size = grid_size;
     }
 
-    pub fn generate(&self) -> (Vec<f32>, Vec<u32>, Vec<f32>) {
+    pub fn generate(&mut self) -> (Vec<f32>, Vec<u32>, Vec<f32>, Vec<f32>) {
         let mut vertices = Vec::new();
         let mut indices = Vec::new();
         let mut normals = Vec::new();
+        let mut colors = Vec::new();
 
         // Calculate grid bounds based on camera position and radius
         let half_grid = (self.grid_size as f32 * self.grid_resolution) / 2.0;
@@ -76,8 +81,54 @@ impl TerrainGenerator {
 
         // Calculate normals
         normals = self.calculate_normals(&vertices, &indices);
+        
+        // Add default terrain color (gray-brown)
+        for _ in 0..(vertices.len() / 3) {
+            colors.push(0.4);
+            colors.push(0.35);
+            colors.push(0.3);
+        }
+        
+        // Generate voxel chunks
+        let chunk_positions = self.get_visible_chunk_positions();
+        for chunk_pos in chunk_positions {
+            let chunk = self.get_or_create_chunk(chunk_pos);
+            let (v, i, n, c) = chunk.generate_mesh();
+            
+            // Offset indices and append to main geometry
+            let vertex_offset = (vertices.len() / 3) as u32;
+            vertices.extend(v);
+            for idx in i {
+                indices.push(idx + vertex_offset);
+            }
+            normals.extend(n);
+            colors.extend(c);
+        }
 
-        (vertices, indices, normals)
+        (vertices, indices, normals, colors)
+    }
+    
+    fn get_visible_chunk_positions(&self) -> Vec<(i32, i32, i32)> {
+        let mut positions = Vec::new();
+        
+        // For now, just generate a few chunks around the camera at fixed height
+        let chunk_x = (self.camera_x / 16.0).floor() as i32;
+        let chunk_z = (self.camera_z / 16.0).floor() as i32;
+        
+        // Generate 3x3 grid of chunks around camera
+        for dx in -1..=1 {
+            for dz in -1..=1 {
+                // Place chunks above terrain (y = 1 for now)
+                positions.push((chunk_x + dx, 1, chunk_z + dz));
+            }
+        }
+        
+        positions
+    }
+    
+    fn get_or_create_chunk(&mut self, pos: (i32, i32, i32)) -> &VoxelChunk {
+        self.voxel_chunks.entry(pos)
+            .or_insert_with(|| VoxelChunk::new(pos.0, pos.1, pos.2))
     }
 
     fn calculate_terrain_height(&self, world_x: f32, world_z: f32) -> f32 {

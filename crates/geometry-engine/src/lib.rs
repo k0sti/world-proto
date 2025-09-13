@@ -36,17 +36,17 @@ impl GeometryEngine {
     }
 
     #[wasm_bindgen]
-    pub fn get_vertices(&self) -> Vec<f32> {
+    pub fn get_vertices(&mut self) -> Vec<f32> {
         self.animation_state.get_current_vertices()
     }
 
     #[wasm_bindgen]
-    pub fn get_indices(&self) -> Vec<u32> {
+    pub fn get_indices(&mut self) -> Vec<u32> {
         self.animation_state.get_current_indices()
     }
 
     #[wasm_bindgen]
-    pub fn get_normals(&self) -> Vec<f32> {
+    pub fn get_normals(&mut self) -> Vec<f32> {
         self.animation_state.get_current_normals()
     }
     
@@ -61,15 +61,17 @@ pub struct GeometryData {
     vertices: Vec<f32>,
     indices: Vec<u32>,
     normals: Vec<f32>,
+    colors: Vec<f32>,
 }
 
 #[wasm_bindgen]
 impl GeometryData {
-    pub fn new(vertices: Vec<f32>, indices: Vec<u32>, normals: Vec<f32>) -> Self {
+    pub fn new(vertices: Vec<f32>, indices: Vec<u32>, normals: Vec<f32>, colors: Vec<f32>) -> Self {
         Self {
             vertices,
             indices,
             normals,
+            colors,
         }
     }
 
@@ -86,5 +88,10 @@ impl GeometryData {
     #[wasm_bindgen(getter)]
     pub fn normals(&self) -> Vec<f32> {
         self.normals.clone()
+    }
+    
+    #[wasm_bindgen(getter)]
+    pub fn colors(&self) -> Vec<f32> {
+        self.colors.clone()
     }
 }

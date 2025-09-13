@@ -78,7 +78,8 @@ export class GeometryControllerAsync {
       this.sceneManager.updateGeometry(
         this.latestGeometry.vertices,
         this.latestGeometry.indices,
-        this.latestGeometry.normals
+        this.latestGeometry.normals,
+        this.latestGeometry.colors
       );
       this.latestGeometry = null; // Clear after applying
     }

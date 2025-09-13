@@ -1,6 +1,7 @@
 pub mod primitives;
 pub mod heightmap;
 pub mod terrain;
+pub mod voxel;
 
 use crate::GeometryData;
 use terrain::TerrainGenerator;
@@ -24,23 +25,23 @@ impl AnimationState {
         self.terrain.set_grid_size(grid_size);
     }
 
-    pub fn generate_geometry(&self) -> GeometryData {
-        let (vertices, indices, normals) = self.terrain.generate();
-        GeometryData::new(vertices, indices, normals)
+    pub fn generate_geometry(&mut self) -> GeometryData {
+        let (vertices, indices, normals, colors) = self.terrain.generate();
+        GeometryData::new(vertices, indices, normals, colors)
     }
 
-    pub fn get_current_vertices(&self) -> Vec<f32> {
-        let (vertices, _, _) = self.terrain.generate();
+    pub fn get_current_vertices(&mut self) -> Vec<f32> {
+        let (vertices, _, _, _) = self.terrain.generate();
         vertices
     }
 
-    pub fn get_current_indices(&self) -> Vec<u32> {
-        let (_, indices, _) = self.terrain.generate();
+    pub fn get_current_indices(&mut self) -> Vec<u32> {
+        let (_, indices, _, _) = self.terrain.generate();
         indices
     }
 
-    pub fn get_current_normals(&self) -> Vec<f32> {
-        let (_, _, normals) = self.terrain.generate();
+    pub fn get_current_normals(&mut self) -> Vec<f32> {
+        let (_, _, normals, _) = self.terrain.generate();
         normals
     }
     

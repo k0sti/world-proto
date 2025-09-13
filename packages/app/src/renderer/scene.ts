@@ -126,7 +126,7 @@ export class SceneManager {
     }
   }
 
-  updateGeometry(vertices: Float32Array, indices: Uint32Array, normals: Float32Array): void {
+  updateGeometry(vertices: Float32Array, indices: Uint32Array, normals: Float32Array, colors?: Float32Array): void {
     if (this.geometryMesh) {
       this.scene.remove(this.geometryMesh);
       this.geometryMesh.geometry.dispose();
@@ -138,10 +138,17 @@ export class SceneManager {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+    
+    // Add vertex colors if provided
+    if (colors && colors.length > 0) {
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    }
+    
     geometry.setIndex(new THREE.BufferAttribute(indices, 1));
 
     const material = new THREE.MeshPhongMaterial({
-      color: 0x00ff88,
+      vertexColors: colors && colors.length > 0,  // Enable vertex colors if provided
+      color: colors && colors.length > 0 ? 0xffffff : 0x00ff88,  // White base when using vertex colors
       specular: 0x111111,
       shininess: 100,
       wireframe: false,
