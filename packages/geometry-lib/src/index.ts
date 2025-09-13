@@ -45,6 +45,11 @@ export class GeometryGenerator {
     if (!this.engine) return new Float32Array();
     return new Float32Array(this.engine.get_normals());
   }
+
+  getAnimationInfo(): string {
+    if (!this.engine) return 'Not initialized';
+    return this.engine.get_animation_info();
+  }
 }
 
 export { GeometryEngine, GeometryData };

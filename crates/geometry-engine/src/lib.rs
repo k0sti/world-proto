@@ -39,6 +39,11 @@ impl GeometryEngine {
     pub fn get_normals(&self) -> Vec<f32> {
         self.animation_state.get_current_normals()
     }
+    
+    #[wasm_bindgen]
+    pub fn get_animation_info(&self) -> String {
+        self.animation_state.get_animation_info()
+    }
 }
 
 #[wasm_bindgen]

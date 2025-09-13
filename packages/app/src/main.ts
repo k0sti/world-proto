@@ -58,6 +58,13 @@ class Application {
 
     this.geometryController.update(currentTime / 1000, deltaTime);
     this.sceneManager.render();
+    
+    // Update stats display
+    const animationInfo = this.geometryGenerator.getAnimationInfo();
+    const statsElement = document.getElementById('stats');
+    if (statsElement) {
+      statsElement.textContent = animationInfo;
+    }
 
     requestAnimationFrame(this.animate);
   };
