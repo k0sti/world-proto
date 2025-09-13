@@ -45,4 +45,17 @@ export class GeometryController {
   reset(): void {
     console.log('Geometry controller reset');
   }
+  
+  setGridSize(gridSize: number): void {
+    this.geometryGenerator.setGridSize(gridSize);
+  }
+  
+  getStats(): { vertices: number; triangles: number } {
+    const vertices = this.geometryGenerator.getVertices();
+    const indices = this.geometryGenerator.getIndices();
+    return {
+      vertices: vertices.length / 3,
+      triangles: indices.length / 3
+    };
+  }
 }

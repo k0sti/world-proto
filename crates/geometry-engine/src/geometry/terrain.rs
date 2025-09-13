@@ -24,6 +24,10 @@ impl TerrainGenerator {
         self.camera_z = camera_z;
         self.radius = radius;
     }
+    
+    pub fn set_grid_size(&mut self, grid_size: usize) {
+        self.grid_size = grid_size;
+    }
 
     pub fn generate(&self) -> (Vec<f32>, Vec<u32>, Vec<f32>) {
         let mut vertices = Vec::new();

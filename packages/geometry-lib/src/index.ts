@@ -50,6 +50,11 @@ export class GeometryGenerator {
     if (!this.engine) return 'Not initialized';
     return this.engine.get_animation_info();
   }
+  
+  setGridSize(gridSize: number): void {
+    if (!this.engine) return;
+    this.engine.set_grid_size(gridSize);
+  }
 }
 
 export { GeometryEngine, GeometryData };

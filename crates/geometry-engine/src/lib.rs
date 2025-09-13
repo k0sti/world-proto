@@ -23,6 +23,11 @@ impl GeometryEngine {
     pub fn update_camera(&mut self, camera_x: f32, camera_z: f32, radius: f32) {
         self.animation_state.update_camera(camera_x, camera_z, radius);
     }
+    
+    #[wasm_bindgen]
+    pub fn set_grid_size(&mut self, grid_size: u32) {
+        self.animation_state.set_grid_size(grid_size as usize);
+    }
 
     #[wasm_bindgen]
     pub fn generate_frame(&mut self, camera_x: f32, camera_z: f32, radius: f32) -> GeometryData {
