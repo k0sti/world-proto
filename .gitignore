@@ -8,6 +8,9 @@ build/
 packages/wasm/
 target/
 
+# TypeScript cache
+*.tsbuildinfo
+
 # IDE
 .vscode/
 .idea/
