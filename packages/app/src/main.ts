@@ -1,33 +1,28 @@
-import { GeometryGenerator } from '@workspace/geometry-lib';
 import { SceneManager } from './renderer/scene';
-import { GeometryController } from './geometry/geometry-controller';
+import { GeometryControllerAsync } from './geometry/geometry-controller-async';
 import { FPSCounter } from './utils/fps-counter';
 
 class Application {
-  private geometryGenerator: GeometryGenerator;
   private sceneManager: SceneManager;
-  private geometryController: GeometryController;
+  private geometryController: GeometryControllerAsync;
   private lastTime: number = 0;
   private isRunning: boolean = false;
-  private fpsCounter: FPSCounter;
+  private renderFPSCounter: FPSCounter;
+  private cameraUpdateInterval: number = 100; // Update camera position every 100ms
+  private lastCameraUpdate: number = 0;
 
   constructor() {
-    this.geometryGenerator = new GeometryGenerator();
     this.sceneManager = new SceneManager();
-    this.geometryController = new GeometryController(
-      this.geometryGenerator,
-      this.sceneManager
-    );
-    this.fpsCounter = new FPSCounter();
+    this.geometryController = new GeometryControllerAsync(this.sceneManager);
+    this.renderFPSCounter = new FPSCounter();
   }
 
   async initialize(): Promise<void> {
     const canvas = document.getElementById('render-canvas') as HTMLCanvasElement;
     if (!canvas) throw new Error('Canvas element not found');
 
-    await this.geometryGenerator.initialize();
     this.sceneManager.initialize(canvas);
-    this.geometryController.initialize();
+    await this.geometryController.initialize();
     
     this.setupEventListeners();
     this.setupDebugPanel();
@@ -73,29 +68,31 @@ class Application {
     const deltaTime = (currentTime - this.lastTime) / 1000;
     this.lastTime = currentTime;
 
-    this.geometryController.update(currentTime / 1000, deltaTime);
+    // Update camera position for geometry generation (throttled)
+    if (currentTime - this.lastCameraUpdate > this.cameraUpdateInterval) {
+      const cameraPos = this.sceneManager.getCameraPosition();
+      this.geometryController.updateCamera(cameraPos.x, cameraPos.z, 30.0);
+      this.lastCameraUpdate = currentTime;
+    }
+
+    // Apply latest geometry if available (decoupled from generation)
+    this.geometryController.applyLatestGeometry();
+    
+    // Render the scene
     this.sceneManager.render();
     
-    // Update FPS counter
-    const fps = this.fpsCounter.update();
+    // Update render FPS counter
+    const fps = this.renderFPSCounter.update();
     const fpsElement = document.getElementById('fps-counter');
     if (fpsElement) {
       fpsElement.textContent = fps.toString();
     }
     
     // Update stats display
-    const animationInfo = this.geometryGenerator.getAnimationInfo();
     const statsElement = document.getElementById('stats');
     if (statsElement) {
-      statsElement.textContent = animationInfo;
+      statsElement.textContent = 'Procedural Terrain Generator';
     }
-    
-    // Update mesh stats
-    const stats = this.geometryController.getStats();
-    const vertexElement = document.getElementById('vertex-count');
-    const triangleElement = document.getElementById('triangle-count');
-    if (vertexElement) vertexElement.textContent = stats.vertices.toString();
-    if (triangleElement) triangleElement.textContent = stats.triangles.toString();
 
     requestAnimationFrame(this.animate);
   };
