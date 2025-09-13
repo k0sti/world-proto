@@ -71,6 +71,46 @@ impl VoxelChunk {
         }
     }
     
+    pub fn new_with_terrain<F>(chunk_x: i32, chunk_y: i32, chunk_z: i32, terrain_height_fn: F) -> Self 
+    where
+        F: Fn(f32, f32) -> f32,
+    {
+        let mut blocks = [[[0u32; 16]; 16]; 16];
+        let mut rng = rand::thread_rng();
+        
+        let chunk_world_x = chunk_x as f32 * 16.0;
+        let chunk_world_y = chunk_y as f32 * 16.0;
+        let chunk_world_z = chunk_z as f32 * 16.0;
+        
+        for x in 0..16 {
+            for z in 0..16 {
+                let world_x = chunk_world_x + x as f32;
+                let world_z = chunk_world_z + z as f32;
+                let terrain_height = terrain_height_fn(world_x, world_z);
+                
+                for y in 0..16 {
+                    let world_y = chunk_world_y + y as f32;
+                    
+                    if world_y < terrain_height - 2.0 {
+                        // Below terrain: always solid (stone)
+                        blocks[x][y][z] = 1;
+                    } else if world_y < terrain_height {
+                        // Just below surface: dirt or grass
+                        blocks[x][y][z] = if world_y < terrain_height - 1.0 { 3 } else { 2 };
+                    } else {
+                        // Above terrain: air
+                        blocks[x][y][z] = 0;
+                    }
+                }
+            }
+        }
+        
+        Self {
+            blocks,
+            position: (chunk_x, chunk_y, chunk_z),
+        }
+    }
+    
     pub fn get_block(&self, x: usize, y: usize, z: usize) -> BlockType {
         BlockType::from_u32(self.blocks[x][y][z])
     }

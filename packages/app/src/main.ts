@@ -68,10 +68,20 @@ class Application {
     const deltaTime = (currentTime - this.lastTime) / 1000;
     this.lastTime = currentTime;
 
+    // Get camera position
+    const cameraPos = this.sceneManager.getCameraPosition();
+    
+    // Update camera position display
+    const cameraXElement = document.getElementById('camera-x');
+    const cameraYElement = document.getElementById('camera-y');
+    const cameraZElement = document.getElementById('camera-z');
+    if (cameraXElement) cameraXElement.textContent = cameraPos.x.toFixed(2);
+    if (cameraYElement) cameraYElement.textContent = cameraPos.y.toFixed(2);
+    if (cameraZElement) cameraZElement.textContent = cameraPos.z.toFixed(2);
+    
     // Update camera position for geometry generation (throttled)
     if (currentTime - this.lastCameraUpdate > this.cameraUpdateInterval) {
-      const cameraPos = this.sceneManager.getCameraPosition();
-      this.geometryController.updateCamera(cameraPos.x, cameraPos.z, 30.0);
+      this.geometryController.updateCamera(cameraPos.x, cameraPos.y, cameraPos.z, 30.0);
       this.lastCameraUpdate = currentTime;
     }
 

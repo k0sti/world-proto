@@ -3,6 +3,7 @@ import { GeometryGenerator } from '@workspace/geometry-lib';
 export interface GeometryMessage {
   type: 'init' | 'update' | 'setGridSize';
   cameraX?: number;
+  cameraY?: number;
   cameraZ?: number;
   radius?: number;
   gridSize?: number;
@@ -26,6 +27,7 @@ class GeometryWorkerManager {
   private updateInterval = 33; // ~30 FPS for geometry updates
   private lastUpdate = 0;
   private currentCameraX = 0;
+  private currentCameraY = 0;
   private currentCameraZ = 0;
   private currentRadius = 30;
   
@@ -58,6 +60,7 @@ class GeometryWorkerManager {
     
     const geometryData = this.generator.generateFrame(
       this.currentCameraX,
+      this.currentCameraY,
       this.currentCameraZ,
       this.currentRadius
     );
@@ -90,8 +93,9 @@ class GeometryWorkerManager {
     }
   }
   
-  updateCamera(x: number, z: number, radius: number) {
+  updateCamera(x: number, y: number, z: number, radius: number) {
     this.currentCameraX = x;
+    this.currentCameraY = y;
     this.currentCameraZ = z;
     this.currentRadius = radius;
   }
@@ -119,8 +123,8 @@ self.addEventListener('message', async (event) => {
       break;
       
     case 'update':
-      if (message.cameraX !== undefined && message.cameraZ !== undefined && message.radius !== undefined) {
-        manager.updateCamera(message.cameraX, message.cameraZ, message.radius);
+      if (message.cameraX !== undefined && message.cameraY !== undefined && message.cameraZ !== undefined && message.radius !== undefined) {
+        manager.updateCamera(message.cameraX, message.cameraY, message.cameraZ, message.radius);
       }
       break;
       

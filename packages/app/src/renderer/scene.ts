@@ -175,9 +175,10 @@ export class SceneManager {
     this.renderer.setSize(width, height);
   }
 
-  getCameraPosition(): { x: number, z: number } {
+  getCameraPosition(): { x: number, y: number, z: number } {
     return {
       x: this.camera.position.x,
+      y: this.camera.position.y,
       z: this.camera.position.z
     };
   }

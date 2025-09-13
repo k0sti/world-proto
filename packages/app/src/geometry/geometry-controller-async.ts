@@ -52,11 +52,12 @@ export class GeometryControllerAsync {
     if (triangleElement) triangleElement.textContent = this.stats.triangles.toString();
   }
   
-  updateCamera(x: number, z: number, radius: number) {
+  updateCamera(x: number, y: number, z: number, radius: number) {
     if (this.worker) {
       this.worker.postMessage({
         type: 'update',
         cameraX: x,
+        cameraY: y,
         cameraZ: z,
         radius
       });

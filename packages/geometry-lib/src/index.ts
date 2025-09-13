@@ -23,12 +23,12 @@ export class GeometryGenerator {
     this.engine = new GeometryEngine();
   }
 
-  generateFrame(cameraX: number, cameraZ: number, radius: number): GeometryData | null {
+  generateFrame(cameraX: number, cameraY: number, cameraZ: number, radius: number): GeometryData | null {
     if (!this.engine) {
       console.error('GeometryEngine not initialized');
       return null;
     }
-    return this.engine.generate_frame(cameraX, cameraZ, radius);
+    return this.engine.generate_frame(cameraX, cameraY, cameraZ, radius);
   }
 
   getVertices(): Float32Array {

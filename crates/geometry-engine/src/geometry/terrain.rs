@@ -6,6 +6,7 @@ pub struct TerrainGenerator {
     grid_size: usize,
     grid_resolution: f32,
     camera_x: f32,
+    camera_y: f32,
     camera_z: f32,
     radius: f32,
     voxel_chunks: HashMap<(i32, i32, i32), VoxelChunk>,
@@ -17,14 +18,16 @@ impl TerrainGenerator {
             grid_size,
             grid_resolution,
             camera_x: 0.0,
+            camera_y: 0.0,
             camera_z: 0.0,
             radius: 15.0,
             voxel_chunks: HashMap::new(),
         }
     }
 
-    pub fn update_camera(&mut self, camera_x: f32, camera_z: f32, radius: f32) {
+    pub fn update_camera(&mut self, camera_x: f32, camera_y: f32, camera_z: f32, radius: f32) {
         self.camera_x = camera_x;
+        self.camera_y = camera_y;
         self.camera_z = camera_z;
         self.radius = radius;
     }
@@ -111,15 +114,17 @@ impl TerrainGenerator {
     fn get_visible_chunk_positions(&self) -> Vec<(i32, i32, i32)> {
         let mut positions = Vec::new();
         
-        // For now, just generate a few chunks around the camera at fixed height
+        // Generate chunks around camera position including vertical chunks
         let chunk_x = (self.camera_x / 16.0).floor() as i32;
+        let chunk_y = (self.camera_y / 16.0).floor() as i32;
         let chunk_z = (self.camera_z / 16.0).floor() as i32;
         
-        // Generate 3x3 grid of chunks around camera
+        // Generate 3x3x3 grid of chunks around camera
         for dx in -1..=1 {
-            for dz in -1..=1 {
-                // Place chunks above terrain (y = 1 for now)
-                positions.push((chunk_x + dx, 1, chunk_z + dz));
+            for dy in -2..=2 {  // More vertical range to see terrain variation
+                for dz in -1..=1 {
+                    positions.push((chunk_x + dx, chunk_y + dy, chunk_z + dz));
+                }
             }
         }
         
@@ -127,11 +132,59 @@ impl TerrainGenerator {
     }
     
     fn get_or_create_chunk(&mut self, pos: (i32, i32, i32)) -> &VoxelChunk {
-        self.voxel_chunks.entry(pos)
-            .or_insert_with(|| VoxelChunk::new(pos.0, pos.1, pos.2))
+        if !self.voxel_chunks.contains_key(&pos) {
+            // Create a closure that captures the terrain calculation
+            let chunk = VoxelChunk::new_with_terrain(pos.0, pos.1, pos.2, |x, z| {
+                // Recreate the terrain height calculation inline
+                let mut height = 0.0;
+                let mut amplitude = 4.0;
+                let mut frequency = 0.01;
+                
+                for _ in 0..5 {
+                    height += Self::noise2d_static(x * frequency, z * frequency) * amplitude;
+                    amplitude *= 0.5;
+                    frequency *= 2.0;
+                }
+                
+                height += Self::noise2d_static(x * 0.002, z * 0.002) * 10.0;
+                height += Self::noise2d_static(x * 0.1, z * 0.1) * 0.5;
+                
+                height
+            });
+            self.voxel_chunks.insert(pos, chunk);
+        }
+        self.voxel_chunks.get(&pos).unwrap()
+    }
+    
+    // Static version of noise functions for use in closures
+    fn noise2d_static(x: f32, y: f32) -> f32 {
+        let ix = x.floor() as i32;
+        let iy = y.floor() as i32;
+        let fx = x - x.floor();
+        let fy = y - y.floor();
+        
+        let a = Self::hash2d_static(ix, iy);
+        let b = Self::hash2d_static(ix + 1, iy);
+        let c = Self::hash2d_static(ix, iy + 1);
+        let d = Self::hash2d_static(ix + 1, iy + 1);
+        
+        let ux = fx * fx * (3.0 - 2.0 * fx);
+        let uy = fy * fy * (3.0 - 2.0 * fy);
+        
+        let x1 = a * (1.0 - ux) + b * ux;
+        let x2 = c * (1.0 - ux) + d * ux;
+        
+        x1 * (1.0 - uy) + x2 * uy
+    }
+    
+    fn hash2d_static(x: i32, y: i32) -> f32 {
+        let mut n = x + y * 57;
+        n = (n << 13) ^ n;
+        let m = (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff;
+        1.0 - (m as f32) / 1073741824.0
     }
 
-    fn calculate_terrain_height(&self, world_x: f32, world_z: f32) -> f32 {
+    pub fn calculate_terrain_height(&self, world_x: f32, world_z: f32) -> f32 {
         // Multi-octave noise for realistic terrain
         let mut height = 0.0;
         let mut amplitude = 4.0;

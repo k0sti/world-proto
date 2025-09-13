@@ -140,7 +140,8 @@ html, body {
   border: none;
 }
 
-#fps-counter, #grid-size-value, #vertex-count, #triangle-count {
+#fps-counter, #grid-size-value, #vertex-count, #triangle-count,
+#camera-x, #camera-y, #camera-z, #geometry-fps {
   color: #00ff88;
   font-weight: bold;
   min-width: 40px;

@@ -17,8 +17,8 @@ impl AnimationState {
         }
     }
 
-    pub fn update_camera(&mut self, camera_x: f32, camera_z: f32, radius: f32) {
-        self.terrain.update_camera(camera_x, camera_z, radius);
+    pub fn update_camera(&mut self, camera_x: f32, camera_y: f32, camera_z: f32, radius: f32) {
+        self.terrain.update_camera(camera_x, camera_y, camera_z, radius);
     }
     
     pub fn set_grid_size(&mut self, grid_size: usize) {
