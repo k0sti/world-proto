@@ -1,12 +1,16 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 
 export class SceneManager {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
   private renderer: THREE.WebGLRenderer;
-  private controls: OrbitControls;
+  private controls: PointerLockControls;
   private geometryMesh: THREE.Mesh | null = null;
+  private keys: { [key: string]: boolean } = {};
+  private moveSpeed: number = 0.1;
+  private velocity: THREE.Vector3 = new THREE.Vector3();
+  private direction: THREE.Vector3 = new THREE.Vector3();
 
   constructor() {
     this.scene = new THREE.Scene();
@@ -17,7 +21,7 @@ export class SceneManager {
       1000
     );
     this.renderer = new THREE.WebGLRenderer();
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = new PointerLockControls(this.camera, document.body);
   }
 
   initialize(canvas: HTMLCanvasElement): void {
@@ -34,14 +38,28 @@ export class SceneManager {
     this.camera.position.set(5, 5, 5);
     this.camera.lookAt(0, 0, 0);
 
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
+    this.controls = new PointerLockControls(this.camera, this.renderer.domElement);
+    this.scene.add(this.controls.getObject());
+    
+    this.renderer.domElement.addEventListener('click', () => {
+      this.controls.lock();
+    });
+    
+    this.controls.addEventListener('lock', () => {
+      const instructions = document.getElementById('instructions');
+      if (instructions) instructions.style.display = 'none';
+    });
+    
+    this.controls.addEventListener('unlock', () => {
+      const instructions = document.getElementById('instructions');
+      if (instructions) instructions.style.display = 'block';
+    });
 
     this.scene.background = new THREE.Color(0x1a1a2e);
     this.scene.fog = new THREE.Fog(0x1a1a2e, 10, 50);
 
     this.setupLights();
+    this.setupKeyboardControls();
 
     const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222);
     this.scene.add(gridHelper);
@@ -65,6 +83,47 @@ export class SceneManager {
     const pointLight = new THREE.PointLight(0x00ff88, 0.5, 100);
     pointLight.position.set(-5, 5, -5);
     this.scene.add(pointLight);
+  }
+
+  private setupKeyboardControls(): void {
+    window.addEventListener('keydown', (event) => {
+      this.keys[event.key.toLowerCase()] = true;
+    });
+
+    window.addEventListener('keyup', (event) => {
+      this.keys[event.key.toLowerCase()] = false;
+    });
+  }
+
+  private updateMovement(): void {
+    if (!this.controls.isLocked) return;
+    
+    const forward = new THREE.Vector3();
+    const right = new THREE.Vector3();
+    
+    this.camera.getWorldDirection(forward);
+    
+    right.crossVectors(forward, new THREE.Vector3(0, 1, 0));
+    right.normalize();
+    
+    if (this.keys['w']) {
+      this.camera.position.addScaledVector(forward, this.moveSpeed);
+    }
+    if (this.keys['s']) {
+      this.camera.position.addScaledVector(forward, -this.moveSpeed);
+    }
+    if (this.keys['a']) {
+      this.camera.position.addScaledVector(right, -this.moveSpeed);
+    }
+    if (this.keys['d']) {
+      this.camera.position.addScaledVector(right, this.moveSpeed);
+    }
+    if (this.keys[' ']) {
+      this.camera.position.y += this.moveSpeed;
+    }
+    if (this.keys['shift']) {
+      this.camera.position.y -= this.moveSpeed;
+    }
   }
 
   updateGeometry(vertices: Float32Array, indices: Uint32Array, normals: Float32Array): void {
@@ -96,7 +155,7 @@ export class SceneManager {
   }
 
   render(): void {
-    this.controls.update();
+    this.updateMovement();
     this.renderer.render(this.scene, this.camera);
   }
 
