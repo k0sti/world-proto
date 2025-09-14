@@ -2,6 +2,8 @@ mod geometry;
 
 use wasm_bindgen::prelude::*;
 use geometry::{AnimationState};
+use crate::geometry::terrain::TerrainParams;
+use serde_wasm_bindgen::from_value;
 
 #[wasm_bindgen]
 pub struct GeometryEngine {
@@ -27,6 +29,18 @@ impl GeometryEngine {
     #[wasm_bindgen]
     pub fn set_render_distance(&mut self, distance: i32) {
         self.animation_state.set_render_distance(distance);
+    }
+    
+    #[wasm_bindgen]
+    pub fn set_terrain_params(&mut self, params_js: JsValue) -> Result<(), JsValue> {
+        let mut params: TerrainParams = from_value(params_js)?;
+        
+        // Convert percentages to fractions
+        params.cave_threshold /= 100.0;
+        params.desert_threshold /= 100.0;
+        
+        self.animation_state.set_terrain_params(params);
+        Ok(())
     }
 }
 

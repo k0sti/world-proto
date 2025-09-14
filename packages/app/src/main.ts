@@ -1,6 +1,8 @@
 import { SceneManager } from './renderer/scene';
 import { GeometryControllerAsync } from './geometry/geometry-controller-async';
 import { FPSCounter } from './utils/fps-counter';
+import { TerrainPanelBuilder } from './ui/terrain-panel-builder';
+import { getDefaultParams, getParamsFromUI, setParamsToUI } from './config/terrain-config';
 
 class Application {
   private sceneManager: SceneManager;
@@ -26,11 +28,61 @@ class Application {
     
     this.setupEventListeners();
     this.setupDebugPanel();
+    this.setupTerrainPanel();
     console.log('Application initialized');
   }
 
   private setupEventListeners(): void {
     window.addEventListener('resize', () => this.handleResize());
+    
+    // Panel toggle buttons
+    const panelToggles = document.querySelectorAll('.panel-toggle');
+    panelToggles.forEach(toggle => {
+      toggle.addEventListener('click', (e) => {
+        const button = e.currentTarget as HTMLElement;
+        const panelName = button.dataset.panel;
+        this.togglePanel(panelName);
+      });
+    });
+    
+    // Keyboard shortcuts for panels
+    // window.addEventListener('keydown', (e) => {
+    //   if (e.key.toLowerCase() === 'h') {
+    //     this.togglePanel('help');
+    //   } else if (e.key.toLowerCase() === 'd') {
+    //     this.togglePanel('debug');
+    //   } else if (e.key.toLowerCase() === 't') {
+    //     this.togglePanel('terrain');
+    //   } else if (e.key.toLowerCase() === 's') {
+    //     this.togglePanel('settings');
+    //   }
+    // });
+  }
+  
+  private togglePanel(panelName: string | undefined): void {
+    if (!panelName) return;
+    
+    // Get all panels and toggle buttons
+    const panels = document.querySelectorAll('.side-panel');
+    const toggles = document.querySelectorAll('.panel-toggle');
+    
+    // Get the specific panel and button
+    const panel = document.getElementById(`${panelName}-panel`);
+    const button = document.querySelector(`.panel-toggle[data-panel="${panelName}"]`);
+    
+    if (panel && button) {
+      const isActive = panel.classList.contains('active');
+      
+      // Close all panels and deactivate all buttons
+      panels.forEach(p => p.classList.remove('active'));
+      toggles.forEach(t => t.classList.remove('active'));
+      
+      // If the panel wasn't active, open it
+      if (!isActive) {
+        panel.classList.add('active');
+        button.classList.add('active');
+      }
+    }
   }
   
   private setupDebugPanel(): void {
@@ -44,6 +96,40 @@ class Application {
         this.geometryController.setRenderDistance(value);
       });
     }
+  }
+  
+  private setupTerrainPanel(): void {
+    // Build controls dynamically from configuration
+    const terrainContent = document.querySelector('#terrain-panel .panel-content');
+    if (terrainContent) {
+      TerrainPanelBuilder.buildControls(terrainContent as HTMLElement);
+    }
+    
+    // Setup event handlers (after controls are built)
+    const applyButton = document.getElementById('apply-terrain');
+    if (applyButton) {
+      applyButton.addEventListener('click', () => {
+        this.applyTerrainSettings();
+      });
+    }
+    
+    const resetButton = document.getElementById('reset-terrain');
+    if (resetButton) {
+      resetButton.addEventListener('click', () => {
+        this.resetTerrainSettings();
+      });
+    }
+  }
+  
+  private applyTerrainSettings(): void {
+    const params = getParamsFromUI();
+    this.geometryController.setTerrainParams(params);
+  }
+  
+  private resetTerrainSettings(): void {
+    const defaultParams = getDefaultParams();
+    setParamsToUI(defaultParams);
+    this.geometryController.setTerrainParams(defaultParams);
   }
 
   private handleResize(): void {

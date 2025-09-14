@@ -3,50 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Geometry Renderer</title>
+  <title>3D Voxel Terrain Generator</title>
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body>
   <div id="app">
     <canvas id="render-canvas"></canvas>
-    <div id="controls">
-      <div id="stats">Voxel Terrain Generator</div>
-      <div id="instructions">
-        <p><strong>Click to start</strong></p>
-        <p>Move: WASD</p>
-        <p>Look: Mouse</p>
-        <p>Up: Space</p>
-        <p>Down: Shift</p>
-        <p>Exit: ESC</p>
+    
+    <!-- Top Bar with Panel Toggles -->
+    <div id="top-bar">
+      <div class="top-bar-title">Voxel Terrain Generator</div>
+      <div class="top-bar-controls">
+        <button class="panel-toggle active" data-panel="help" title="Help (H)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </button>
+        <button class="panel-toggle" data-panel="debug" title="Debug Panel (D)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"></path>
+            <path d="M9 12l2 2 4-4"></path>
+          </svg>
+        </button>
+        <button class="panel-toggle" data-panel="terrain" title="Terrain Generation (T)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path>
+            <path d="M13 13l6 6"></path>
+          </svg>
+        </button>
+        <button class="panel-toggle" data-panel="settings" title="Settings (S)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 9.96l4.24 4.24M18.46 14.04l4.24 4.24M1.54 14.04l4.24-4.24"></path>
+          </svg>
+        </button>
       </div>
     </div>
-    <div id="debug-panel">
-      <h3>Debug Panel</h3>
-      <div class="debug-row">
-        <label>Camera X: <span id="camera-x">0.00</span></label>
+    
+    <!-- Help Panel (Instructions) -->
+    <div id="help-panel" class="side-panel active">
+      <h3>Controls</h3>
+      <div class="panel-content">
+        <p><strong>Click to start</strong></p>
+        <p><strong>Movement:</strong></p>
+        <ul>
+          <li>W/A/S/D - Move</li>
+          <li>Space - Up</li>
+          <li>Shift - Down</li>
+          <li>Mouse - Look around</li>
+          <li>ESC - Exit pointer lock</li>
+        </ul>
+        <p><strong>Panels:</strong></p>
+        <ul>
+          <li>H - Help panel</li>
+          <li>D - Debug panel</li>
+          <li>T - Terrain generation</li>
+          <li>S - Settings</li>
+        </ul>
       </div>
-      <div class="debug-row">
-        <label>Camera Y: <span id="camera-y">0.00</span></label>
+    </div>
+    
+    <!-- Debug Panel -->
+    <div id="debug-panel" class="side-panel">
+      <h3>Debug Info</h3>
+      <div class="panel-content">
+        <div class="debug-row">
+          <label>Camera X: <span id="camera-x">0.00</span></label>
+        </div>
+        <div class="debug-row">
+          <label>Camera Y: <span id="camera-y">0.00</span></label>
+        </div>
+        <div class="debug-row">
+          <label>Camera Z: <span id="camera-z">0.00</span></label>
+        </div>
+        <div class="debug-row">
+          <label>Render FPS: <span id="fps-counter">0</span></label>
+        </div>
+        <div class="debug-row">
+          <label>Geometry FPS: <span id="geometry-fps">0</span></label>
+        </div>
+        <div class="debug-row">
+          <label>Vertices: <span id="vertex-count">0</span></label>
+        </div>
+        <div class="debug-row">
+          <label>Triangles: <span id="triangle-count">0</span></label>
+        </div>
+        <div class="debug-row">
+          <label>Chunks Loaded: <span id="chunk-count">0</span></label>
+        </div>
       </div>
-      <div class="debug-row">
-        <label>Camera Z: <span id="camera-z">0.00</span></label>
+    </div>
+    
+    <!-- Terrain Generation Panel -->
+    <div id="terrain-panel" class="side-panel">
+      <h3>Terrain Generation</h3>
+      <div class="panel-content">
+        <!-- Controls will be dynamically generated here -->
       </div>
-      <div class="debug-row">
-        <label>Render FPS: <span id="fps-counter">0</span></label>
-      </div>
-      <div class="debug-row">
-        <label>Geometry FPS: <span id="geometry-fps">0</span></label>
-      </div>
-      <div class="debug-row">
-        <label for="render-distance">Render Distance:</label>
-        <input type="range" id="render-distance" min="1" max="5" value="1" step="1">
-        <span id="render-distance-value">1</span>
-      </div>
-      <div class="debug-row">
-        <label>Vertices: <span id="vertex-count">0</span></label>
-      </div>
-      <div class="debug-row">
-        <label>Triangles: <span id="triangle-count">0</span></label>
+    </div>
+    
+    <!-- Settings Panel -->
+    <div id="settings-panel" class="side-panel">
+      <h3>Settings</h3>
+      <div class="panel-content">
+        <!-- Render Distance -->
+        <div class="control-row">
+          <label for="render-distance">Render Distance:</label>
+          <input type="range" id="render-distance" min="1" max="5" value="1" step="1">
+          <span id="render-distance-value">1</span>
+          <p class="info-text">Controls how many chunks are rendered around you</p>
+        </div>
+        
+        <!-- Graphics Quality -->
+        <div class="control-row">
+          <label>Graphics Info:</label>
+          <div class="info-list">
+            <p>• Shadows: Enabled</p>
+            <p>• Ambient Occlusion: Basic</p>
+            <p>• View Distance: <span id="view-distance">48</span> blocks</p>
+          </div>
+        </div>
+        
+        <!-- Performance Stats -->
+        <div class="control-row">
+          <label>Performance:</label>
+          <div class="info-list">
+            <p>• Target FPS: 60</p>
+            <p>• Chunk Size: 16x16x16</p>
+            <p>• Max Chunks: <span id="max-chunks">125</span></p>
+          </div>
+        </div>
+        
+        <!-- Block Legend -->
+        <div class="control-row">
+          <label>Block Types:</label>
+          <div class="block-legend">
+            <div class="legend-item">
+              <span class="legend-color" style="background: #808080;"></span> Stone
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #00ff00;"></span> Grass
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #8b4513;"></span> Dirt
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #0080ff;"></span> Water
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #f4e4c1;"></span> Sand
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #654321;"></span> Wood
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #228b22;"></span> Leaves
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -1,3 +1,0 @@
-[install]
-# Use the platform's fastest package manager
-registry = "https://registry.npmjs.org"

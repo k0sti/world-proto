@@ -1,6 +1,6 @@
 import { SceneManager } from '../renderer/scene';
 import { FPSCounter } from '../utils/fps-counter';
-import { GeometryResult } from '../workers/geometry-worker';
+import { GeometryResult, TerrainParams } from '../workers/geometry-worker';
 
 export class GeometryControllerAsync {
   private sceneManager: SceneManager;
@@ -69,6 +69,15 @@ export class GeometryControllerAsync {
       this.worker.postMessage({
         type: 'setRenderDistance',
         renderDistance: distance
+      });
+    }
+  }
+  
+  setTerrainParams(params: TerrainParams) {
+    if (this.worker) {
+      this.worker.postMessage({
+        type: 'setTerrainParams',
+        terrainParams: params
       });
     }
   }

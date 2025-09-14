@@ -2,7 +2,7 @@ pub mod terrain;
 pub mod voxel;
 
 use crate::GeometryData;
-use terrain::TerrainGenerator;
+use terrain::{TerrainGenerator, TerrainParams};
 
 pub struct AnimationState {
     terrain: TerrainGenerator,
@@ -21,6 +21,10 @@ impl AnimationState {
     
     pub fn set_render_distance(&mut self, distance: i32) {
         self.terrain.set_render_distance(distance);
+    }
+    
+    pub fn set_terrain_params(&mut self, params: TerrainParams) {
+        self.terrain.set_terrain_params(params);
     }
 
     pub fn generate_geometry(&mut self) -> GeometryData {

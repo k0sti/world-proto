@@ -23,65 +23,69 @@ html, body {
   display: block;
 }
 
-#controls {
+/* Top Bar */
+#top-bar {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  background: rgba(26, 26, 46, 0.9);
-  padding: 15px;
-  border-radius: 8px;
-  color: #ffffff;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: rgba(26, 26, 46, 0.95);
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
 }
 
-#stats {
-  font-size: 14px;
-  line-height: 1.6;
+.top-bar-title {
   color: #00ff88;
-  font-family: 'Courier New', monospace;
-}
-
-#stats::before {
-  content: "3D Geometry Renderer";
-  display: block;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 10px;
-  color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
 }
 
-#stats::after {
-  content: "Powered by Rust/WASM + Three.js";
-  display: block;
-  font-size: 12px;
-  margin-top: 8px;
-  color: #888;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+.top-bar-controls {
+  display: flex;
+  gap: 10px;
 }
 
-#instructions {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-#instructions p {
-  margin: 5px 0;
-  font-size: 13px;
+.panel-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
   color: #ccc;
-  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#instructions strong {
+.panel-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(0, 255, 136, 0.5);
+  color: #fff;
+}
+
+.panel-toggle.active {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: #00ff88;
   color: #00ff88;
-  font-size: 14px;
 }
 
-#debug-panel {
+.panel-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Side Panels */
+.side-panel {
   position: absolute;
-  top: 20px;
+  top: 60px;
   right: 20px;
   background: rgba(26, 26, 46, 0.95);
   padding: 15px;
@@ -89,11 +93,19 @@ html, body {
   color: #ffffff;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  min-width: 200px;
-  font-family: 'Courier New', monospace;
+  min-width: 250px;
+  max-width: 300px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: none;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
 }
 
-#debug-panel h3 {
+.side-panel.active {
+  display: block;
+}
+
+.side-panel h3 {
   margin: 0 0 15px 0;
   color: #00ff88;
   font-size: 16px;
@@ -101,12 +113,48 @@ html, body {
   padding-bottom: 8px;
 }
 
+.panel-content {
+  font-size: 13px;
+}
+
+.panel-content p {
+  margin: 10px 0;
+  color: #ccc;
+}
+
+.panel-content ul {
+  list-style: none;
+  padding-left: 10px;
+  margin: 10px 0;
+}
+
+.panel-content li {
+  margin: 5px 0;
+  color: #aaa;
+  padding-left: 15px;
+  position: relative;
+}
+
+.panel-content li:before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #00ff88;
+}
+
+.panel-content strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Debug Panel Specific */
 .debug-row {
   margin: 8px 0;
   font-size: 13px;
   display: flex;
   align-items: center;
   gap: 10px;
+  font-family: 'Courier New', monospace;
 }
 
 .debug-row label {
@@ -114,15 +162,34 @@ html, body {
   flex: 1;
 }
 
-.debug-row input[type="range"] {
-  width: 100px;
+/* Terrain Panel Specific */
+.control-row {
+  margin: 15px 0;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.control-row:last-child {
+  border-bottom: none;
+}
+
+.control-row label {
+  display: block;
+  color: #fff;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.control-row input[type="range"] {
+  width: 120px;
   height: 4px;
   background: rgba(255, 255, 255, 0.2);
   outline: none;
   border-radius: 2px;
+  margin: 0 10px;
 }
 
-.debug-row input[type="range"]::-webkit-slider-thumb {
+.control-row input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 12px;
   height: 12px;
@@ -131,7 +198,7 @@ html, body {
   border-radius: 50%;
 }
 
-.debug-row input[type="range"]::-moz-range-thumb {
+.control-row input[type="range"]::-moz-range-thumb {
   width: 12px;
   height: 12px;
   background: #00ff88;
@@ -140,10 +207,95 @@ html, body {
   border: none;
 }
 
-#fps-counter, #grid-size-value, #vertex-count, #triangle-count,
-#camera-x, #camera-y, #camera-z, #geometry-fps {
+.info-text {
+  color: #aaa;
+  font-size: 12px;
+  margin: 5px 0;
+}
+
+.info-list {
+  font-size: 12px;
+  color: #888;
+}
+
+.block-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Value displays */
+#fps-counter, #render-distance-value, #vertex-count, #triangle-count,
+#camera-x, #camera-y, #camera-z, #geometry-fps, #chunk-count,
+#mountain-scale-value, #hills-scale-value, #roughness-value,
+#sea-level-value, #tree-density-value, #cave-frequency-value,
+#biome-scale-value, #desert-threshold-value, #view-distance, #max-chunks {
   color: #00ff88;
   font-weight: bold;
   min-width: 40px;
   display: inline-block;
+}
+
+/* Buttons */
+.apply-button, .reset-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  margin-right: 10px;
+}
+
+.apply-button {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: #00ff88;
+  color: #00ff88;
+}
+
+.apply-button:hover {
+  background: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.reset-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Scrollbar styling for panels */
+.side-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.side-panel::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.side-panel::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.3);
+  border-radius: 3px;
+}
+
+.side-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 136, 0.5);
 }

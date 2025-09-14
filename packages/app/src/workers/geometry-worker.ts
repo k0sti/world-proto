@@ -1,12 +1,24 @@
 import { GeometryGenerator } from '@workspace/geometry-lib';
 
+export interface TerrainParams {
+  mountainScale: number;
+  hillsScale: number;
+  roughness: number;
+  seaLevel: number;
+  treeDensity: number;
+  caveThreshold: number;
+  biomeScale: number;
+  desertThreshold: number;
+}
+
 export interface GeometryMessage {
-  type: 'init' | 'update' | 'setRenderDistance';
+  type: 'init' | 'update' | 'setRenderDistance' | 'setTerrainParams';
   cameraX?: number;
   cameraY?: number;
   cameraZ?: number;
   radius?: number;
   renderDistance?: number;
+  terrainParams?: TerrainParams;
 }
 
 export interface GeometryResult {
@@ -106,6 +118,11 @@ class GeometryWorkerManager {
     }
   }
   
+  setTerrainParams(params: TerrainParams) {
+    if (this.generator) {
+      this.generator.setTerrainParams(params);
+    }
+  }
   
   stop() {
     this.isRunning = false;
@@ -132,6 +149,12 @@ self.addEventListener('message', async (event) => {
     case 'setRenderDistance':
       if (message.renderDistance !== undefined) {
         manager.setRenderDistance(message.renderDistance);
+      }
+      break;
+      
+    case 'setTerrainParams':
+      if (message.terrainParams !== undefined) {
+        manager.setTerrainParams(message.terrainParams);
       }
       break;
   }

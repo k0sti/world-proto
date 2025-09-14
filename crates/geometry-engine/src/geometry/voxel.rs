@@ -1,3 +1,5 @@
+use super::terrain::TerrainParams;
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(u32)]
 pub enum BlockType {
@@ -46,9 +48,19 @@ pub struct VoxelChunk {
 }
 
 impl VoxelChunk {
-    pub fn new_with_terrain<F>(chunk_x: i32, chunk_y: i32, chunk_z: i32, terrain_height_fn: F) -> Self 
+    pub fn new_with_terrain_params<F, G, H>(
+        chunk_x: i32, 
+        chunk_y: i32, 
+        chunk_z: i32,
+        params: TerrainParams,
+        terrain_height_fn: F,
+        biome_fn: G,
+        detail_fn: H,
+    ) -> Self 
     where
-        F: Fn(f32, f32) -> f32,
+        F: Fn(f32, f32, &TerrainParams) -> f32,
+        G: Fn(f32, f32, &TerrainParams) -> f32,
+        H: Fn(f32, f32, f32, &TerrainParams) -> f32,
     {
         let mut blocks = [[[0u32; 16]; 16]; 16];
         
@@ -56,24 +68,101 @@ impl VoxelChunk {
         let chunk_world_y = chunk_y as f32 * 16.0;
         let chunk_world_z = chunk_z as f32 * 16.0;
         
+        // Use sea level from params
+        let sea_level = params.sea_level;
+        
         for x in 0..16 {
             for z in 0..16 {
                 let world_x = chunk_world_x + x as f32;
                 let world_z = chunk_world_z + z as f32;
-                let terrain_height = terrain_height_fn(world_x, world_z);
+                
+                // Get terrain height and biome value
+                let terrain_height = terrain_height_fn(world_x, world_z, &params);
+                let biome = biome_fn(world_x, world_z, &params);
+                
+                // Determine if this is a beach/desert area
+                let is_beach = terrain_height > sea_level - 2.0 && terrain_height < sea_level + 3.0;
+                let is_desert = biome > params.desert_threshold && terrain_height > sea_level;
+                let is_mountain = terrain_height > 15.0;
                 
                 for y in 0..16 {
                     let world_y = chunk_world_y + y as f32;
                     
-                    if world_y < terrain_height - 2.0 {
-                        // Below terrain: always solid (stone)
+                    // Add some 3D noise for caves
+                    let cave_noise = detail_fn(world_x, world_y, world_z, &params);
+                    let is_cave = cave_noise > params.cave_threshold && world_y < terrain_height - 5.0;
+                    
+                    if is_cave {
+                        blocks[x][y][z] = 0; // Air for caves
+                    } else if world_y < terrain_height - 5.0 {
+                        // Deep underground: always stone
+                        blocks[x][y][z] = 1;
+                    } else if world_y < terrain_height - 2.0 {
+                        // Underground: stone
                         blocks[x][y][z] = 1;
                     } else if world_y < terrain_height {
-                        // Just below surface: dirt or grass
-                        blocks[x][y][z] = if world_y < terrain_height - 1.0 { 3 } else { 2 };
+                        // Near surface
+                        if is_beach || (terrain_height < sea_level + 1.0) {
+                            blocks[x][y][z] = 5; // Sand near water
+                        } else if is_desert {
+                            blocks[x][y][z] = 5; // Sand in desert
+                        } else if is_mountain && world_y > 20.0 {
+                            blocks[x][y][z] = 1; // Stone on mountains
+                        } else {
+                            blocks[x][y][z] = 3; // Dirt
+                        }
+                    } else if world_y < terrain_height + 1.0 {
+                        // Surface layer
+                        if world_y < sea_level && terrain_height < sea_level {
+                            blocks[x][y][z] = 4; // Water
+                        } else if is_beach || is_desert {
+                            blocks[x][y][z] = 5; // Sand
+                        } else if is_mountain && world_y > 25.0 {
+                            blocks[x][y][z] = 1; // Stone on high mountains
+                        } else {
+                            blocks[x][y][z] = 2; // Grass
+                        }
+                    } else if world_y < sea_level {
+                        // Fill with water up to sea level
+                        blocks[x][y][z] = 4;
                     } else {
-                        // Above terrain: air
-                        blocks[x][y][z] = 0;
+                        // Check for trees
+                        if world_y == (terrain_height + 1.0).floor() && 
+                           !is_beach && !is_desert && !is_mountain {
+                            // Tree generation based on density parameter
+                            let tree_hash = ((world_x as i32 * 73 + world_z as i32 * 179) % 100).abs();
+                            if tree_hash < params.tree_density as i32 {
+                                // Place a tree trunk
+                                for tree_y in 0..5 {
+                                    let block_y = y + tree_y;
+                                    if block_y < 16 {
+                                        if tree_y < 4 {
+                                            blocks[x][block_y][z] = 6; // Wood
+                                        } else {
+                                            blocks[x][block_y][z] = 7; // Leaves
+                                        }
+                                    }
+                                }
+                                // Add leaves around the top
+                                if y + 3 < 16 {
+                                    for dx in -1i32..=1 {
+                                        for dz in -1i32..=1 {
+                                            if dx != 0 || dz != 0 {
+                                                let leaf_x = (x as i32 + dx) as usize;
+                                                let leaf_z = (z as i32 + dz) as usize;
+                                                if leaf_x < 16 && leaf_z < 16 && y + 3 < 16 {
+                                                    if blocks[leaf_x][y + 3][leaf_z] == 0 {
+                                                        blocks[leaf_x][y + 3][leaf_z] = 7;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            blocks[x][y][z] = 0; // Air
+                        }
                     }
                 }
             }

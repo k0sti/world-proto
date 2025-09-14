@@ -38,6 +38,14 @@ export class GeometryGenerator {
     }
     this.engine.set_render_distance(distance);
   }
+  
+  setTerrainParams(params: any): void {
+    if (!this.engine) {
+      console.error('GeometryEngine not initialized');
+      return;
+    }
+    this.engine.set_terrain_params(params);
+  }
 }
 
 export { GeometryEngine, GeometryData };
