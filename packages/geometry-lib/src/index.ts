@@ -1,4 +1,4 @@
-import init, { GeometryEngine, GeometryData } from '@workspace/wasm';
+import init, { GeometryEngine, GeometryData } from 'geometry-engine';
 
 let wasmInitialized = false;
 let initPromise: Promise<void> | null = null;
