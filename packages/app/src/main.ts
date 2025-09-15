@@ -7,7 +7,7 @@ import { getDefaultParams, getParamsFromUI, setParamsToUI } from './config/terra
 class Application {
   private sceneManager: SceneManager;
   private geometryController: GeometryControllerAsync;
-  private lastTime: number = 0;
+  // private lastTime: number = 0;
   private isRunning: boolean = false;
   private renderFPSCounter: FPSCounter;
   private cameraUpdateInterval: number = 100; // Update camera position every 100ms
@@ -139,7 +139,7 @@ class Application {
   start(): void {
     if (this.isRunning) return;
     this.isRunning = true;
-    this.lastTime = performance.now();
+    // this.lastTime = performance.now();
     this.animate();
   }
 
@@ -151,8 +151,8 @@ class Application {
     if (!this.isRunning) return;
 
     const currentTime = performance.now();
-    const deltaTime = (currentTime - this.lastTime) / 1000;
-    this.lastTime = currentTime;
+    // const deltaTime = (currentTime - this.lastTime) / 1000;
+    // this.lastTime = currentTime;
 
     // Get camera position
     const cameraPos = this.sceneManager.getCameraPosition();

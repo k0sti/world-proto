@@ -9,8 +9,8 @@ export class SceneManager {
   private geometryMesh: THREE.Mesh | null = null;
   private keys: { [key: string]: boolean } = {};
   private moveSpeed: number = 0.1;
-  private velocity: THREE.Vector3 = new THREE.Vector3();
-  private direction: THREE.Vector3 = new THREE.Vector3();
+  // private velocity: THREE.Vector3 = new THREE.Vector3();
+  // private direction: THREE.Vector3 = new THREE.Vector3();
 
   constructor() {
     this.scene = new THREE.Scene();
